@@ -1,47 +1,52 @@
-import { Cipher } from 'crypto';
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
-export enum UserRole {
-    CLIENT = 'CLIENT',
-    GYM_OWNER = 'GYM_OWNER',
-    GYM_STAFF = 'GYM_STAFF',
-    ADMIN = 'ADMIN',
-}
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity({ name: 'users' })
 export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @IsEmail()
+    @IsString()
+    @IsNotEmpty()
     @Column({ unique: true })
     email: string;
 
+    @IsString()
+    @IsNotEmpty()
     @Column()
     password_hash: string;
 
-    @Column({
-        type: 'enum',
-        enum: UserRole,
-        default: UserRole.CLIENT,
-    })
-    role: UserRole;
-
+    @IsString()
+    @IsNotEmpty()
     @Column()
     name: string;
-    
-    @Column({
-        type: 'int',
-        nullable: true,
-    })
-    country_code: number | null;
 
+    @IsString()
+    @IsOptional()
     @Column({
-        type: 'int',
+        type: 'varchar',
+        length: 10,
         nullable: true,
     })
-    phone_number: number | null;
+    country_code?: string | null;
+
+    @IsString()
+    @IsOptional()
+    @Column({
+        type: 'varchar',
+        length: 20,
+        nullable: true,
+    })
+    phone_number?: string | null;
 
     @Column()
     is_Active: boolean;
+
+    @CreateDateColumn()
+    created_at: Date;
+
+    @UpdateDateColumn()
+    updated_at: Date;
 
 }
