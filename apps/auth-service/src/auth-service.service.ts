@@ -17,13 +17,22 @@ export class AuthServiceService {
   ) { }
 
 
-  // Hashes password using bcrypt
+  /**
+   * Hashes a password
+   * @param password password to be hashed
+   * @returns hashed password
+   */
   async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
   }
 
-  // Validates user credentials and returns data
+  /**
+   * Checks if credentials are valid
+   * @param email user email
+   * @param pass user password
+   * @returns used data if credentials are valid, null otherwise
+   */
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userRepository.findOneBy({ email });
     if (user && (await bcrypt.compare(pass, user.password_hash))) {
@@ -33,7 +42,12 @@ export class AuthServiceService {
     return null;
   }
 
-  // Registers a new user
+  /**
+   * Registers a new user
+   * @param RegisterUserDTO dto used to transfer data needed for registering a user
+   * @returns User object
+   * @throws UnauthorizedException if email is already in use
+   */
   async register(RegisterUserDTO: RegisterUserDTO): Promise<User> {
     // grabs data from dto
     const { email, password, role, name, country_code, phone_number } = RegisterUserDTO;
@@ -62,7 +76,12 @@ export class AuthServiceService {
     return this.userRepository.save(newUser);
   }
 
-  // Logs in a user and returns JWT token
+  /**
+   * Logs in a user and returns JWT token
+   * @param loginDTO dto used to transfer data needed for login
+   * @returns payload with JWT token
+   * @throws UnauthorizedException if credentials are invalid
+   */
   async login(loginDTO: LoginDTO): Promise<{ access_token: string }> {
     // grabs data from dto
     const { email, password } = loginDTO;
