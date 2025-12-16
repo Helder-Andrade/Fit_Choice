@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { User, UserRole } from './modules/user.entity';
+import { User } from './modules/user.entity';
 import { LoginDTO } from './dtos/loginDTO';
 import { RegisterUserDTO } from './dtos/registerDTO';
 
@@ -50,7 +50,7 @@ export class AuthServiceService {
    */
   async register(RegisterUserDTO: RegisterUserDTO): Promise<User> {
     // grabs data from dto
-    const { email, password, role, name, country_code, phone_number } = RegisterUserDTO;
+    const { email, password, name, country_code, phone_number } = RegisterUserDTO;
     
     // checks if email is already in use
     const exists = await this.userRepository.findOneBy({ email});
@@ -65,7 +65,6 @@ export class AuthServiceService {
     const newUser = this.userRepository.create({
       email,
       password_hash,
-      role,
       name,
       country_code: country_code || null,
       phone_number: phone_number || null,

@@ -1,6 +1,4 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString,  } from "class-validator";
-import { UserRole } from "../modules/user.entity";
-import { Transform } from "class-transformer";
 
 
 export class RegisterUserDTO {
@@ -10,11 +8,6 @@ export class RegisterUserDTO {
 
     @IsNotEmpty()
     readonly password: string;
-
-    @IsNotEmpty()
-    @Transform(({ value }) => ("" + value).toUpperCase())
-    @IsEnum(UserRole)
-    readonly role: UserRole;
     
     @IsString()
     @IsNotEmpty()

@@ -1,13 +1,6 @@
 import { Cipher } from 'crypto';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-export enum UserRole {
-    CLIENT = 'CLIENT',
-    GYM_OWNER = 'GYM_OWNER',
-    GYM_STAFF = 'GYM_STAFF',
-    ADMIN = 'ADMIN',
-}
-
 @Entity({ name: 'users' })
 export class User {
     @PrimaryGeneratedColumn()
@@ -18,13 +11,6 @@ export class User {
 
     @Column()
     password_hash: string;
-
-    @Column({
-        type: 'enum',
-        enum: UserRole,
-        default: UserRole.CLIENT,
-    })
-    role: UserRole;
 
     @Column()
     name: string;
