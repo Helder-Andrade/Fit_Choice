@@ -11,7 +11,7 @@ import { RegisterUserDTO } from './dtos/registerDTO';
 export class AuthServiceService {
 
   constructor(
-    @InjectRepository(User, 'authConnection')
+    @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
   ) { }
@@ -21,6 +21,10 @@ export class AuthServiceService {
   async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     return bcrypt.hash(password, salt);
+  }
+
+  async decodeToken(token:string): Promise<any>{
+    return this.jwtService.decode(token);
   }
 
   // Validates user credentials and returns data
@@ -73,7 +77,7 @@ export class AuthServiceService {
     }
 
     // creates JWT payload
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { email: user.email, sub: user.id};
 
     // returns JWT token with payload
     return{

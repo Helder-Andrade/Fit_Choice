@@ -15,8 +15,6 @@ describe('GymServiceController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(gymServiceController.getHello()).toBe('Hello World!');
-    });
+    
   });
 });

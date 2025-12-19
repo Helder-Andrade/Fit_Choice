@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { LoginDTO } from 'apps/auth-service/src/dtos/loginDTO';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  
+
+  login( credentials: LoginDTO){
+    
   }
 }

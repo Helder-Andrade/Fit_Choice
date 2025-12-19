@@ -1,54 +1,56 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthServiceModule } from '../../auth-service/src/auth-service.module';
-import { AuthModuleOptions } from '@nestjs/passport';
-import { User } from '../../auth-service/src/modules/user.entity';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AuthController } from './auth/auth.controller';
+import { GymController } from './gyms/gym.Controller';
+import { JwtStrategy } from 'apps/auth-service/src/modules/auth/jwt.strategy';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['ambient_variables.env'],
     }),
-    TypeOrmModule.forRootAsync({
-      name: 'authConnection',
+
+    JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (ConfigService: ConfigService) => ({
-        type: 'postgres',
-        host: ConfigService.get<string>('AUTH_DB_HOST'),
-        port: ConfigService.get<number>('AUTH_DB_PORT'),
-        username: ConfigService.get<string>('AUTH_DB_USERNAME'),
-        password: ConfigService.get<string>('AUTH_DB_PASSWORD'),
-        database: ConfigService.get<string>('AUTH_DB_NAME'),
-        entities: [User],
-        synchronize: true,
-      }),
       inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '60m' }
+      })
     }),
 
-    /*TypeOrmModule.forRootAsync({
-      name: 'CoreConnection',
-      imports: [ConfigModule],
-      useFactory: (ConfigService: ConfigService) => ({
-        type: 'postgres',
-        host: ConfigService.get<string>('CORE_DB_HOST'),
-        port: ConfigService.get<number>('CORE_DB_PORT'),
-        username: ConfigService.get<string>('CORE_DB_USERNAME'),
-        password: ConfigService.get<string>('CORE_DB_PASSWORD'),
-        database: ConfigService.get<string>('CORE_DB_NAME'),
-        entities: ['*.entity{.ts,.js}'],
-        synchronize: true,
-      }),
-      inject: [ConfigService],
-    }),
-    */
 
-    AuthServiceModule,
+
+    ClientsModule.register([{
+      name: 'AUTH_SERVICE',
+      transport: Transport.TCP,
+      options: {
+        host: '127.0.0.1',
+        port: 3003,
+      }
+    },
+    ]),
+    ClientsModule.register([{
+      name: 'GYM_SERVICE',
+      transport: Transport.TCP,
+      options: {
+        host: '127.0.0.1',
+        port: 3004,
+      }
+    }]),
+
+
+
+
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AuthController, GymController],
+  providers: [AppService, JwtStrategy],
 })
 export class AppModule { }
