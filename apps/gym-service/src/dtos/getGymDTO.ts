@@ -57,4 +57,8 @@ export class getGymDTO {
     @IsOptional()
     readonly images_urls?: string[];
 
+
+    @IsOptional()
+    readonly distance?: number; // Distance in meters
+
 }

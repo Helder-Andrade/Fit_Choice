@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 import { IsNotEmpty, IsString, IsOptional, IsEmail, IsInt, IsDecimal, IsUrl, ArrayMinSize, ArrayMaxSize } from 'class-validator';
+import * as geojson from 'geojson';
 
 
 @Entity({ name: 'gyms' })
@@ -18,7 +19,7 @@ export class Gym {
     address: string;
 
     @IsString()
-    @Column({ type: 'text'})
+    @Column({ type: 'text' })
     description: string;
 
     @IsEmail()
@@ -44,15 +45,13 @@ export class Gym {
     })
     phone_number?: string | null;
 
-    @IsDecimal()
-    @IsOptional()
-    @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
-    latitude?: number;
-
-    @IsDecimal()
-    @IsOptional()
-    @Column({ type: 'decimal', precision: 10, scale: 7, nullable: true })
-    longitude?: number;
+    @Index({ spatial: true })
+    @Column({
+        type: 'geography',
+        spatialFeatureType: 'Point',
+        srid: 4326,
+    })
+    location: geojson.Point;
 
     @IsUrl()
     @IsOptional()
@@ -64,15 +63,15 @@ export class Gym {
     @Column({ type: 'varchar', length: 255, nullable: true })
     logo_url?: string;
 
-    @IsUrl(undefined, { each: true }) 
-    @ArrayMinSize(0) 
-    @ArrayMaxSize(4) 
+    @IsUrl(undefined, { each: true })
+    @ArrayMinSize(0)
+    @ArrayMaxSize(4)
     @IsOptional()
-    @Column('text', { array: true, nullable: true }) 
+    @Column('text', { array: true, nullable: true })
     images_urls?: string[];
 
     @Column({ type: 'boolean', default: true })
-    is_Active:boolean;
+    is_Active: boolean;
 
     @CreateDateColumn()
     created_at: Date;
