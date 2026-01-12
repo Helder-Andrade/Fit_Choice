@@ -3,9 +3,11 @@ import { GymServiceController } from './gym-service.controller';
 import { GymServiceService } from './gym-service.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Gym } from './modules/gym.entity';
-import { User_Gym } from './modules/user_gym.entity';
+import { Gym } from '../../entities/gym.entity';
+import { User_Gym } from '../../entities/user_gym.entity';
 import { JwtAuthGuard } from 'apps/auth-service/src/modules/auth/jwt-auth.guard';
+import { GymUserServiceModule } from '../gym-user/gym_user.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -15,20 +17,27 @@ import { JwtAuthGuard } from 'apps/auth-service/src/modules/auth/jwt-auth.guard'
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (ConfigService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: ConfigService.get<string>('GYM_DB_HOST'),
-        port: ConfigService.get<number>('GYM_DB_PORT'),
-        username: ConfigService.get<string>('GYM_DB_USERNAME'),
-        password: ConfigService.get<string>('GYM_DB_PASSWORD'),
-        database: ConfigService.get<string>('GYM_DB_NAME'),
+        host: configService.get<string>('GYM_DB_HOST'),
+        port: configService.get<number>('GYM_DB_PORT'),
+        username: configService.get<string>('GYM_DB_USERNAME'),
+        password: configService.get<string>('GYM_DB_PASSWORD'),
+        database: configService.get<string>('GYM_DB_NAME'),
         entities: [Gym, User_Gym],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([Gym]),
-    TypeOrmModule.forFeature([User_Gym]),
+    GymUserServiceModule, 
+    ClientsModule.register([
+      {
+        name: 'AUTH_SERVICE',
+        transport: Transport.TCP,
+        options: { host: '127.0.0.1', port: 3003 },
+      },
+    ]),
   ],
   controllers: [GymServiceController],
   providers: [GymServiceService, JwtAuthGuard],

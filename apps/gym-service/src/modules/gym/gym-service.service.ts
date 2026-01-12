@@ -1,19 +1,20 @@
 import { Injectable, Logger, UnauthorizedException, NotFoundException } from '@nestjs/common';
-import { RegisterGymDTO } from './dtos/registerGymDTO';
+import { RegisterGymDTO } from '../../dtos/registerGymDTO';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Gym } from './modules/gym.entity';
-import { User_Gym, UserRole } from './modules/user_gym.entity'
+import { Gym } from '../../entities/gym.entity';
+import { User_Gym, UserRole } from '../../entities/user_gym.entity'
 import { Repository } from 'typeorm';
-import { getGymDTO } from './dtos/getGymDTO';
-import { GymSearchDto } from './dtos/gymSearchByDistanceDTO';
+import { getGymDTO } from '../../dtos/getGymDTO';
+import { GymSearchDto } from '../../dtos/gymSearchByDistanceDTO';
+import { GymUserService } from '../gym-user/gym_user.service';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class GymServiceService {
   constructor(
     @InjectRepository(Gym)
     private gymRepository: Repository<Gym>,
-    @InjectRepository(User_Gym)
-    private gymUserRepository: Repository<User_Gym>,
+    private readonly gymUserService: GymUserService,
   ) { }
 
   async createGym(dto: RegisterGymDTO) {
@@ -46,20 +47,26 @@ export class GymServiceService {
     const gym = await this.gymRepository.findOneBy({ id: gymId });
 
     if (!gym) {
-        throw new NotFoundException(`Gym with ID ${gymId} not found`);
+      throw new RpcException({
+        message: 'Gym with ID ${gymId} not found',
+        status: 404
+      });
     }
 
-    
+
     const updatedGym = this.gymRepository.merge(gym, dto);
 
     return await this.gymRepository.save(updatedGym);
-}
+  }
 
 
   async getGymById(gymId: number): Promise<getGymDTO> {
     const gym = await this.gymRepository.findOneBy({ id: gymId });
     if (!gym) {
-      throw new NotFoundException('Gym not found');
+      throw new RpcException({
+        message: 'Gym not found',
+        status: 404
+      });
     }
     return this.mapToGetGymDTO(gym);
   }
@@ -90,15 +97,6 @@ export class GymServiceService {
       const distValue = parseFloat(raw[index].distance);
       return this.mapToGetGymDTO(gym, distValue);
     });
-  }
-
-  async associateUserToGym(gymId: number, userId: number, role: UserRole) {
-    const newAssociation = this.gymUserRepository.create({
-      gymId,
-      userId,
-      role: role,
-    });
-    return await this.gymUserRepository.save(newAssociation);
   }
 
 

@@ -1,22 +1,36 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Request, ForbiddenException, Logger } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Request, ForbiddenException, Logger, Inject, NotFoundException } from '@nestjs/common';
+import { RegisterGymDTO } from '../../dtos/registerGymDTO';
+import { UserRole } from '../../entities/user_gym.entity';
+import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
+import { GymSearchDto } from '../../dtos/gymSearchByDistanceDTO';
+import { GymRolesGuard } from '../../entities/auth/gym-roles.guard';
+import { RegisterClientDTO } from '../../dtos/registerClientDTO';
 import { GymServiceService } from './gym-service.service';
-import { RegisterGymDTO } from './dtos/registerGymDTO';
-import { UserRole } from './modules/user_gym.entity';
-import { MessagePattern, Payload } from '@nestjs/microservices';
-import { GymSearchDto } from './dtos/gymSearchByDistanceDTO';
-import { GymRolesGuard } from './modules/auth/gym-roles.guard';
+import { GymUserService } from '../gym-user/gym_user.service';
+import { firstValueFrom, NotFoundError } from 'rxjs';
 
 @Controller()
 export class GymServiceController {
-  constructor(private readonly gymService: GymServiceService) { }
+  constructor(
+    private readonly gymService: GymServiceService,
+    private readonly gymUserService: GymUserService,
+    @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy
+  ) { }
 
   @MessagePattern('register_gym')
   async registerGym(data: { dto: RegisterGymDTO, userId: number }) {
     try {
       const { dto, userId } = data;
-
       const gym = await this.gymService.createGym(dto);
-      await this.gymService.associateUserToGym(gym.id, userId, UserRole.GYM_OWNER);
+
+      const userValidation = await firstValueFrom(
+        this.authClient.send('validate_user_exists', userId)
+      );
+      if (!userValidation.exists) {
+        return { success: false, message: 'User does not exist' };
+      }
+
+      await this.gymUserService.associateUserToGym(gym.id, userId, UserRole.GYM_OWNER);
 
       return { success: true, payload: gym };
     } catch (error) {
@@ -26,7 +40,7 @@ export class GymServiceController {
 
   @MessagePattern('update_gym')
   @UseGuards(GymRolesGuard)
-  async updateGym(data: { dto: RegisterGymDTO, gymId:number }){
+  async updateGym(data: { dto: RegisterGymDTO, gymId: number }) {
     try {
       const gym = await this.gymService.updateGym(data.dto, data.gymId);
       return { success: true, payload: gym };

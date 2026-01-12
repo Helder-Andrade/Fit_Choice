@@ -7,6 +7,7 @@ import { GymController } from './gyms/gym.Controller';
 import { JwtStrategy } from 'apps/auth-service/src/modules/auth/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { GymUserControllerPB } from './gyms/gym_user.Controller';
 
 @Module({
   imports: [
@@ -50,7 +51,7 @@ import { JwtModule } from '@nestjs/jwt';
 
 
   ],
-  controllers: [AuthController, GymController],
+  controllers: [AuthController, GymController, GymUserControllerPB],
   providers: [AppService, JwtStrategy],
 })
 export class AppModule { }

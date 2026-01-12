@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import { User } from './modules/user.entity';
 import { LoginDTO } from './dtos/loginDTO';
 import { RegisterUserDTO } from './dtos/registerDTO';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class AuthServiceService {
@@ -23,7 +24,7 @@ export class AuthServiceService {
     return bcrypt.hash(password, salt);
   }
 
-  async decodeToken(token:string): Promise<any>{
+  async decodeToken(token: string): Promise<any> {
     return this.jwtService.decode(token);
   }
 
@@ -41,9 +42,9 @@ export class AuthServiceService {
   async register(RegisterUserDTO: RegisterUserDTO): Promise<User> {
     // grabs data from dto
     const { email, password, name, country_code, phone_number } = RegisterUserDTO;
-    
+
     // checks if email is already in use
-    const exists = await this.userRepository.findOneBy({ email});
+    const exists = await this.userRepository.findOneBy({ email });
     if (exists) {
       throw new UnauthorizedException('Email already in use');
     }
@@ -72,18 +73,27 @@ export class AuthServiceService {
 
     // validates user credentials
     const user = await this.validateUser(email, password);
-    if(!user){
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // creates JWT payload
-    const payload = { email: user.email, sub: user.id};
+    const payload = { email: user.email, sub: user.id };
 
     // returns JWT token with payload
-    return{
+    return {
       access_token: this.jwtService.sign(payload),
     }
-    
+
+  }
+
+  async findById(userId: number) {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (user != null && user != undefined) {
+      return user;
+    }
+
+    throw new NotFoundException("User Not Found");
   }
 
 }

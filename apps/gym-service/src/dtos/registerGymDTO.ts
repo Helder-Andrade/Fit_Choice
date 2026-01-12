@@ -1,5 +1,5 @@
 import { ArrayMaxSize, ArrayMinSize, IsDecimal, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, maxLength, } from "class-validator";
-import { UserRole } from "../modules/user_gym.entity";
+import { UserRole } from "../entities/user_gym.entity";
 
 export class RegisterGymDTO {
 

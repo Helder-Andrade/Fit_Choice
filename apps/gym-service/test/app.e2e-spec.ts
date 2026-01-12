@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { GymServiceModule } from './../src/gym-service.module';
+import { GymServiceModule } from '../src/modules/gym/gym-service.module';
 
 describe('GymServiceController (e2e)', () => {
   let app: INestApplication;

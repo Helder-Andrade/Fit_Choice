@@ -16,6 +16,7 @@ export class User_Gym {
     userId: number;
 
     @PrimaryColumn({
+        name: 'role',
         type: 'enum',
         enum: UserRole,
         default: UserRole.CLIENT,

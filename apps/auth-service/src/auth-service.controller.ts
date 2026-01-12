@@ -24,4 +24,15 @@ export class AuthServiceController {
   async register(@Payload() data: RegisterUserDTO) {
     return this.authService.register(data);
   }
+
+  @MessagePattern('validate_user_exists')
+  async validateUser(@Payload() userId: number) {
+    try {
+      const user = await this.authService.findById(userId);
+      return { exists: user !== null && user !== undefined };
+    } catch (error) {
+      return { exists: false }
+    }
+
+  }
 }

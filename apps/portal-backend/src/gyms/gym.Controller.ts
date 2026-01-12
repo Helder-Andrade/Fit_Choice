@@ -1,8 +1,7 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, Post, UseGuards, Request, Logger, BadRequestException, Get, Param, ParseIntPipe, NotFoundException, Query, InternalServerErrorException, Patch, Req } from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, Inject, Post, UseGuards, Request, Logger, BadRequestException, Get, Param, ParseIntPipe, NotFoundException, Query, InternalServerErrorException, Patch, Req, HttpException } from "@nestjs/common";
 import { ClientProxy, ClientsModule } from "@nestjs/microservices";
 import { JwtAuthGuard } from "apps/auth-service/src/modules/auth/jwt-auth.guard";
 import { RegisterGymDTO } from "apps/gym-service/src/dtos/registerGymDTO";
-import { GymRolesGuard } from "apps/gym-service/src/modules/auth/gym-roles.guard";
 import { firstValueFrom } from "rxjs";
 
 @Controller('gym')
@@ -26,15 +25,13 @@ export class GymController {
     @Patch('update/:id')
     @UseGuards(JwtAuthGuard)
     async updateGym(@Param('id') gymId: string, @Body() dto: RegisterGymDTO, @Req() req) {
-
-        
         const payload = {
-            gymId: Number(gymId),     
-            userId: req.user.userId, 
-            dto: dto             
+            gymId: Number(gymId),
+            userId: req.user.userId,
+            dto: dto
         };
 
-        return this.gymClient.send('update_gym', payload);
+        return await firstValueFrom(this.gymClient.send('update_gym', payload));
     }
 
 

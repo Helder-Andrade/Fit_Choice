@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { GymServiceModule } from './gym-service.module';
+import { GymServiceModule } from './modules/gym/gym-service.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from '@nestjs/common';
 
@@ -14,6 +14,6 @@ async function bootstrap() {
 
   await app.listen();
 
-  Logger.log('Auth service is listening on port 3004')
+  Logger.log('Gym Microservice is listening on port 3004');
 }
 bootstrap();
