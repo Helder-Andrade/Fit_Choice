@@ -3,11 +3,12 @@ import { RegisterGymDTO } from '../../dtos/registerGymDTO';
 import { UserRole } from '../../entities/user_gym.entity';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
 import { GymSearchDto } from '../../dtos/gymSearchByDistanceDTO';
-import { GymRolesGuard } from '../../entities/auth/gym-roles.guard';
+import { GymStaffGuard } from '../../entities/auth/gym-roles.guard';
 import { RegisterClientDTO } from '../../dtos/registerClientDTO';
 import { GymServiceService } from './gym-service.service';
 import { GymUserService } from '../gym-user/gym_user.service';
 import { firstValueFrom, NotFoundError } from 'rxjs';
+import { GymOwnerGuard } from '../../entities/auth/gym-owner.guard';
 
 @Controller()
 export class GymServiceController {
@@ -38,8 +39,19 @@ export class GymServiceController {
     }
   }
 
+
+  @MessagePattern('delete_gym')
+  @UseGuards(GymOwnerGuard)
+  async deleteGym(@Payload() data: { gymId: number, userId: number }) {
+    try {
+      return await this.gymService.remove(data.gymId, data.userId);
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+
   @MessagePattern('update_gym')
-  @UseGuards(GymRolesGuard)
+  @UseGuards(GymStaffGuard)
   async updateGym(data: { dto: RegisterGymDTO, gymId: number }) {
     try {
       const gym = await this.gymService.updateGym(data.dto, data.gymId);

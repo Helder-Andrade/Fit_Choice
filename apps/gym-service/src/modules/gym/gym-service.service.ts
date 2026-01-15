@@ -11,6 +11,7 @@ import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class GymServiceService {
+
   constructor(
     @InjectRepository(Gym)
     private gymRepository: Repository<Gym>,
@@ -57,6 +58,16 @@ export class GymServiceService {
     const updatedGym = this.gymRepository.merge(gym, dto);
 
     return await this.gymRepository.save(updatedGym);
+  }
+
+  async remove(id: number, userId: number) {
+
+    const gym = await this.gymRepository.findOne({ where: { id } });
+
+    if (!gym) throw new Error('Gym not found');
+
+    await this.gymRepository.delete(id);
+    return { success: true };
   }
 
 

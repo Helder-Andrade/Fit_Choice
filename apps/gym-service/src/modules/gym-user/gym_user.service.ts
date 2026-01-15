@@ -40,7 +40,7 @@ export class GymUserService {
             const newAssociation = this.gymUserRepository.create({
                 gymId: gymId,
                 userId: userId,
-                role:role,
+                role: role,
             });
             return await this.gymUserRepository.save(newAssociation);
         } catch (dbError) {
@@ -51,5 +51,64 @@ export class GymUserService {
         }
     }
 
+    async removeSpecificRole(gymId: number, userId: number, role: UserRole) {
+        const result = await this.gymUserRepository.delete({ 
+            gymId: gymId, 
+            userId: userId,
+            role: role 
+        });
+
+        if (result.affected === 0) {
+            throw new RpcException({
+                message: `User does not have the role '${role}' at this gym`,
+                status: 404
+            });
+        }
+
+        return { success: true };
+    }
+
+
+    /**
+     * Get all staff/members for a specific gym
+     */
+    async getGymMembers(gymId: number) {
+        const members = await this.gymUserRepository.find({
+            where: { gymId: gymId }
+        });
+
+        if (!members.length) {
+            return [];
+        }
+
+        // Optional: Call Auth service here to get names/emails for these user IDs
+        return members;
+    }
+
+    /**
+     * Get all gyms a specific user belongs to
+     */
+    async getUserMemberships(userId: number) {
+        return await this.gymUserRepository.find({
+            where: { userId: userId, role:UserRole.CLIENT }
+        });
+    }
+
+    /**
+     * Check if a user has a specific role
+     */
+    async getUserRolesAtGym(gymId: number, userId: number): Promise<UserRole[]> {
+        const relations = await this.gymUserRepository.find({
+            where: { 
+                gymId: gymId, 
+                userId: userId 
+            }
+        });
+
+        // Map the database entities to just the role strings
+        return relations.map(rel => rel.role);
+    }
+
 
 }
+
