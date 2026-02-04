@@ -1,11 +1,5 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-
-export enum UserRole {
-    CLIENT = 'CLIENT',
-    GYM_OWNER = 'GYM_OWNER',
-    GYM_STAFF = 'GYM_STAFF',
-    ADMIN = 'ADMIN',
-}
+import { UserRole } from "@app/shared";
 
 @Entity({ name: 'user_gym' })
 export class User_Gym {

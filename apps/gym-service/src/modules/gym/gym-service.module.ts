@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Gym } from '../../entities/gym.entity';
 import { User_Gym } from '../../entities/user_gym.entity';
-import { JwtAuthGuard } from 'apps/auth-service/src/modules/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '@app/auth';
 import { GymUserServiceModule } from '../gym-user/gym_user.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 

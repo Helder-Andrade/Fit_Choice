@@ -1,9 +1,8 @@
 import { Injectable, Logger, UnauthorizedException, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Gym } from '../../entities/gym.entity';
-import { User_Gym, UserRole } from '../../entities/user_gym.entity'
+import { User_Gym} from '../../entities/user_gym.entity'
+import { UserRole } from '@app/shared';
 import { Repository } from 'typeorm';
-import { getGymDTO } from '../../dtos/getGymDTO';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
@@ -52,10 +51,10 @@ export class GymUserService {
     }
 
     async removeSpecificRole(gymId: number, userId: number, role: UserRole) {
-        const result = await this.gymUserRepository.delete({ 
-            gymId: gymId, 
+        const result = await this.gymUserRepository.delete({
+            gymId: gymId,
             userId: userId,
-            role: role 
+            role: role
         });
 
         if (result.affected === 0) {
@@ -66,6 +65,27 @@ export class GymUserService {
         }
 
         return { success: true };
+    }
+
+    /**
+    * Deletes all user-gym associations for a specific gym.
+    * Usually called as part of a cascading delete or a manual gym removal process.
+    */
+    async removeGymRoles(gymId: number): Promise<{success: boolean}> {
+        Logger.log(`Removing all user roles for Gym ID ${gymId}`);
+
+        try {
+            const result = await this.gymUserRepository.delete({ gymId: gymId });
+
+            Logger.log(`Successfully removed ${result.affected} role associations for Gym ID ${gymId}`);
+
+            return { success: true };
+        } catch (error) {
+            throw new RpcException({
+                message: `Failed to remove gym roles: ${error.message}`,
+                status: 500
+            });
+        }
     }
 
 
@@ -90,7 +110,7 @@ export class GymUserService {
      */
     async getUserMemberships(userId: number) {
         return await this.gymUserRepository.find({
-            where: { userId: userId, role:UserRole.CLIENT }
+            where: { userId: userId, role: UserRole.CLIENT }
         });
     }
 
@@ -99,15 +119,17 @@ export class GymUserService {
      */
     async getUserRolesAtGym(gymId: number, userId: number): Promise<UserRole[]> {
         const relations = await this.gymUserRepository.find({
-            where: { 
-                gymId: gymId, 
-                userId: userId 
+            where: {
+                gymId: gymId,
+                userId: userId
             }
         });
 
         // Map the database entities to just the role strings
         return relations.map(rel => rel.role);
     }
+
+
 
 
 }

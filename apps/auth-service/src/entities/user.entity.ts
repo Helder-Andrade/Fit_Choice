@@ -6,24 +6,17 @@ export class User {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @IsEmail()
-    @IsString()
-    @IsNotEmpty()
+
     @Column({ unique: true })
     email: string;
 
-    @IsString()
-    @IsNotEmpty()
     @Column()
     password_hash: string;
 
-    @IsString()
-    @IsNotEmpty()
+
     @Column()
     name: string;
 
-    @IsString()
-    @IsOptional()
     @Column({
         type: 'varchar',
         length: 10,
@@ -31,8 +24,6 @@ export class User {
     })
     country_code?: string | null;
 
-    @IsString()
-    @IsOptional()
     @Column({
         type: 'varchar',
         length: 20,

@@ -1,8 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Request, ForbiddenException, Logger } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
-import { RegisterClientDTO } from '../../dtos/registerClientDTO';
 import { GymUserService } from './gym_user.service';
-import { GymStaffGuard } from '../../entities/auth/gym-roles.guard';
+import { GymStaffGuard } from '../../guards/gym-roles.guard';
 
 @Controller()
 export class GymUserController {

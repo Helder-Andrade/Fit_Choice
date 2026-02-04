@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { User } from './modules/user.entity';
-import { LoginDTO } from './dtos/loginDTO';
-import { RegisterUserDTO } from './dtos/registerDTO';
+import { User } from './entities/user.entity';
+import { LoginDTO } from '../../../libs/shared/src/dtos/auth/loginDTO';
+import { RegisterUserDTO } from '../../../libs/shared/src/dtos/auth/registerDTO';
 import { NotFoundError } from 'rxjs';
 
 @Injectable()

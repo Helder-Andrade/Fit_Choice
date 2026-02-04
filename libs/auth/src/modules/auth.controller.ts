@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Inject, Post } from "@nestjs/common";
 import { ClientProxy, ClientsModule } from "@nestjs/microservices";
-import { LoginDTO } from "apps/auth-service/src/dtos/loginDTO";
-import { RegisterUserDTO } from "apps/auth-service/src/dtos/registerDTO";
+import { LoginDTO } from "@app/shared/dtos/auth/loginDTO";
+import { RegisterUserDTO } from "@app/shared/dtos/auth/registerDTO";
 import { firstValueFrom } from "rxjs";
 
 @Controller('auth')

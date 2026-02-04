@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { User_Gym, UserRole } from "../user_gym.entity";
+import { User_Gym } from "../entities/user_gym.entity"
+import { UserRole } from "@app/shared";
 import { Repository } from "typeorm";
 import { RpcException } from "@nestjs/microservices";
 

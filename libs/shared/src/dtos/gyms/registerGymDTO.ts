@@ -1,5 +1,6 @@
-import { ArrayMaxSize, ArrayMinSize, IsDecimal, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, maxLength, } from "class-validator";
-import { UserRole } from "../entities/user_gym.entity";
+import { ArrayMaxSize, ArrayMinSize, IsDecimal, IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, Max, MaxLength, maxLength, Min, } from "class-validator";
+import { UserRole } from "@app/shared";
+import { Type } from "class-transformer";
 
 export class RegisterGymDTO {
 
@@ -28,11 +29,17 @@ export class RegisterGymDTO {
     @MaxLength(20)
     readonly phone_number?: string | null;
 
-    @IsDecimal()
+    @IsNumber() 
+    @Type(() => Number) 
+    @Min(-90)
+    @Max(90)
     @IsOptional()
     readonly latitude?: number;
 
-    @IsDecimal()
+    @IsNumber()
+    @Type(() => Number)
+    @Min(-180)
+    @Max(180)
     @IsOptional()
     readonly longitude?: number;
 

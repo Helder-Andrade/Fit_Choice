@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User_Gym } from '../../entities/user_gym.entity';
-import { JwtAuthGuard } from 'apps/auth-service/src/modules/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '@app/auth';
 import { GymUserService } from './gym_user.service';
 import { GymUserController } from './gym_user.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';

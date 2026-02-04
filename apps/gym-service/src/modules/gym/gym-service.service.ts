@@ -1,11 +1,9 @@
 import { Injectable, Logger, UnauthorizedException, NotFoundException } from '@nestjs/common';
-import { RegisterGymDTO } from '../../dtos/registerGymDTO';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Gym } from '../../entities/gym.entity';
-import { User_Gym, UserRole } from '../../entities/user_gym.entity'
 import { Repository } from 'typeorm';
-import { getGymDTO } from '../../dtos/getGymDTO';
-import { GymSearchDto } from '../../dtos/gymSearchByDistanceDTO';
+import { getGymDTO } from '@app/shared';
+import { GymSearchDto, RegisterGymDTO } from '@app/shared';
 import { GymUserService } from '../gym-user/gym_user.service';
 import { RpcException } from '@nestjs/microservices';
 
@@ -67,6 +65,14 @@ export class GymServiceService {
     if (!gym) throw new Error('Gym not found');
 
     await this.gymRepository.delete(id);
+    const res = await this.gymUserService.removeGymRoles(id);
+
+    if (res.success !== true) {
+      throw new RpcException({
+        message: 'Failed to remove associated user roles for the gym',
+        status: 500
+      });
+    }
     return { success: true };
   }
 
@@ -79,12 +85,21 @@ export class GymServiceService {
         status: 404
       });
     }
-    return this.mapToGetGymDTO(gym);
+    return new getGymDTO(gym);
   }
-
   async getGyms(): Promise<getGymDTO[]> {
-    const gyms = await this.gymRepository.find();
-    return gyms.map((gym) => this.mapToGetGymDTO(gym));
+    try {
+      const gyms = await this.gymRepository.find({
+        select: ['id', 'name', 'address', 'location'],
+      });
+      return gyms.map(gym => new getGymDTO(gym));
+    } catch (error) {
+      throw new RpcException({
+        message: 'Error fetching gyms',
+        status: 500
+      });
+    }
+
   }
 
   async getGymsByLocation(searchDto: GymSearchDto): Promise<getGymDTO[]> {
@@ -106,31 +121,35 @@ export class GymServiceService {
 
     return entities.map((gym, index) => {
       const distValue = parseFloat(raw[index].distance);
-      return this.mapToGetGymDTO(gym, distValue);
+      return new getGymDTO({
+        ...gym,
+        distance: distValue
+      });
     });
   }
 
 
+  async updateGymMedia(gymId: number, logoUrl?: string, imagesUrls?: string[]) {
+    const gym = await this.gymRepository.findOneBy({ id: gymId });
 
+    if (!gym) {
+      throw new RpcException({
+        message: `Gym with ID ${gymId} not found`,
+        status: 404
+      });
+    }
 
+    // Update logo if a new URL is provided
+    if (logoUrl !== undefined) {
+      gym.logo_url = logoUrl;
+    }
 
+    // Update images if new URLs are provided
+    if (imagesUrls !== undefined && imagesUrls.length > 0) {
+      // Replaces the existing list with the new one
+      gym.images_urls = imagesUrls;
+    }
 
-  // Helper method to map Entity to DTO since we now have to extract coords from Point
-  private mapToGetGymDTO(gym: Gym, distance?: number): getGymDTO {
-    return new getGymDTO({
-      name: gym.name,
-      address: gym.address,
-      description: gym.description,
-      contact_email: gym.contact_email,
-      country_code: gym.country_code,
-      phone_number: gym.phone_number,
-      // Extract coordinates: [0] is Longitude, [1] is Latitude
-      longitude: gym.location.coordinates[0],
-      latitude: gym.location.coordinates[1],
-      website_url: gym.website_url,
-      logo_url: gym.logo_url,
-      images_urls: gym.images_urls,
-      distance: distance ? Math.round(distance) : undefined,
-    });
+    return await this.gymRepository.save(gym);
   }
 }

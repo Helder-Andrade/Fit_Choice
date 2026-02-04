@@ -2,16 +2,19 @@ import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { AuthController } from './auth/auth.controller';
 import { GymController } from './gyms/gym.Controller';
-import { JwtStrategy } from 'apps/auth-service/src/modules/auth/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { GymUserControllerPB } from './gyms/gym_user.Controller';
-import { StorageService } from './storage/storage.service';
+import { StorageController } from './storage/storage.Controller';
+import { CommonAuthModule, AuthController } from '@app/auth';
+import { StorageModule, StorageService } from '@app/storage';
 
 @Module({
   imports: [
+    CommonAuthModule,
+    StorageModule,
+
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
     ConfigModule.forRoot({
@@ -52,7 +55,7 @@ import { StorageService } from './storage/storage.service';
 
 
   ],
-  controllers: [AuthController, GymController, GymUserControllerPB],
-  providers: [AppService, JwtStrategy, StorageService],
+  controllers: [AuthController, GymController, GymUserControllerPB, StorageController],
+  providers: [AppService, StorageService],
 })
 export class AppModule { }

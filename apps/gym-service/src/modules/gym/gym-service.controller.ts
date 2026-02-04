@@ -1,14 +1,12 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards, Request, ForbiddenException, Logger, Inject, NotFoundException } from '@nestjs/common';
-import { RegisterGymDTO } from '../../dtos/registerGymDTO';
-import { UserRole } from '../../entities/user_gym.entity';
+import { Controller, UseGuards, Logger, Inject } from '@nestjs/common';
+import { UserRole } from '@app/shared';
 import { ClientProxy, MessagePattern, Payload } from '@nestjs/microservices';
-import { GymSearchDto } from '../../dtos/gymSearchByDistanceDTO';
-import { GymStaffGuard } from '../../entities/auth/gym-roles.guard';
-import { RegisterClientDTO } from '../../dtos/registerClientDTO';
+import { GymSearchDto, RegisterGymDTO } from '@app/shared';
+import { GymStaffGuard } from '../../guards/gym-roles.guard';
 import { GymServiceService } from './gym-service.service';
 import { GymUserService } from '../gym-user/gym_user.service';
-import { firstValueFrom, NotFoundError } from 'rxjs';
-import { GymOwnerGuard } from '../../entities/auth/gym-owner.guard';
+import { firstValueFrom } from 'rxjs';
+import { GymOwnerGuard } from '../../guards/gym-owner.guard';
 
 @Controller()
 export class GymServiceController {
@@ -80,7 +78,7 @@ export class GymServiceController {
       return { success: true, payload: gyms };
 
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: error.message, status: error.status };
     }
   }
 
@@ -89,6 +87,18 @@ export class GymServiceController {
     try {
       const gyms = await this.gymService.getGymsByLocation(data);
       return { success: true, payload: gyms };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
+  }
+
+
+
+  @MessagePattern('update_gym_media')
+  async updateGymMedia(data: { gymId: number, logo_url?: string, images_urls?: string[] }) {
+    try {
+      const gym = await this.gymService.updateGymMedia(data.gymId, data.logo_url, data.images_urls);
+      return { success: true, payload: gym };
     } catch (error) {
       return { success: false, message: error.message };
     }

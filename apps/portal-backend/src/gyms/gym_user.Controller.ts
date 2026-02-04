@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, HttpCode, HttpStatus, Inject, Logger, Param, Post, Delete, Get, Req, UseGuards, Query } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { RegisterClientDTO } from "apps/gym-service/src/dtos/registerClientDTO";
+import { JwtAuthGuard } from "../../../../libs/auth/src/modules/jwt-auth.guard";
+import { RegisterClientDTO } from "@app/shared/dtos/gyms/registerClientDTO";
 import { firstValueFrom } from "rxjs";
 
 @Controller('gym_user')

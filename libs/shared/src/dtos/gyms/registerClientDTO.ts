@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsNumber } from "class-validator";
-import { UserRole } from "../entities/user_gym.entity";
+import { UserRole } from "@app/shared";
 
 export class RegisterClientDTO {
     @IsNumber()

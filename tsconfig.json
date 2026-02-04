@@ -21,6 +21,25 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {}
+    "paths": {
+      "@app/auth": [
+        "libs/auth/src"
+      ],
+      "@app/auth/*": [
+        "libs/auth/src/*"
+      ],
+      "@app/shared": [
+        "libs/shared/src"
+      ],
+      "@app/shared/*": [
+        "libs/shared/src/*"
+      ],
+      "@app/storage": [
+        "libs/storage/src"
+      ],
+      "@app/storage/*": [
+        "libs/storage/src/*"
+      ]
+    }
   }
 }

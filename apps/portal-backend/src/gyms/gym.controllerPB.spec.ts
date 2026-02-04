@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GymController } from './gym.Controller';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from '../../../../libs/storage/src/storage.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { of } from 'rxjs';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
