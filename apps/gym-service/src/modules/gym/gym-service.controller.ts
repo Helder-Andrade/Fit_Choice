@@ -103,4 +103,16 @@ export class GymServiceController {
       return { success: false, message: error.message };
     }
   }
+
+  @MessagePattern('delete_gym_logo')
+  @UseGuards(GymOwnerGuard)
+  async deleteLogo(@Payload() data: { gymId: number, userId: number }) {
+    return this.gymService.removeLogo(data.gymId, data.userId);
+  }
+
+  @MessagePattern('delete_gym_gallery_image')
+  @UseGuards(GymOwnerGuard)
+  async deleteGalleryImage(@Payload() data: { gymId: number, imageUrl: string, userId: number }) {
+    return this.gymService.removeGalleryImage(data.gymId, data.imageUrl, data.userId);
+  }
 }

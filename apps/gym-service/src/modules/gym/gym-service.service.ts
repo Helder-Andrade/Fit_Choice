@@ -152,4 +152,42 @@ export class GymServiceService {
 
     return await this.gymRepository.save(gym);
   }
+
+  async removeLogo(gymId: number, userId: number) {
+    // 1. Find the gym (and verify ownership if needed)
+    const gym = await this.gymRepository.findOne({ where: { id: gymId } });
+
+    if (!gym) {
+      return { success: false, message: 'Gym not found' };
+    }
+
+    // 2. Check ownership (or use your Guard at the controller level)
+    
+
+    const oldUrl = gym.logo_url;
+
+    // 3. Update DB
+    gym.logo_url = '';
+    await this.gymRepository.save(gym);
+
+    // 4. Return the old URL so the Portal knows what to delete from R2
+    return { success: true, message: 'Logo removed', deletedUrl: oldUrl };
+  }
+
+  async removeGalleryImage(gymId: number, imageUrl: string, userId: number) {
+    const gym = await this.gymRepository.findOne({ where: { id: gymId } });
+
+    if (!gym) return { success: false, message: 'Gym not found' };
+
+    // 1. Filter out the image
+    // Assuming images_urls is a simple string array (json/simple-array type)
+    if (gym.images_urls && gym.images_urls.includes(imageUrl)) {
+      gym.images_urls = gym.images_urls.filter(url => url !== imageUrl);
+
+      await this.gymRepository.save(gym);
+      return { success: true, message: 'Image deleted' };
+    }
+
+    return { success: false, message: 'Image not found in gallery' };
+  }
 }

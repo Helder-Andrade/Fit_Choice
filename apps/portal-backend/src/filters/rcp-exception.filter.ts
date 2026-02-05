@@ -8,6 +8,8 @@ export class HyperRpcExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
+    Logger.error(`Exception caught in HyperRpcExceptionFilter: ${exception.message || exception}`, exception.stack);
+    
     // 1. Determine the status
     let status = exception instanceof HttpException
       ? exception.getStatus()

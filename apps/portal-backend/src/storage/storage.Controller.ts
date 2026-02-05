@@ -1,4 +1,4 @@
-import { Controller, Patch, Param, UseInterceptors, UploadedFiles, UseGuards, Logger, BadRequestException, Inject, HttpException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Patch, Param, UseInterceptors, UploadedFiles, UseGuards, Logger, BadRequestException, Inject, HttpException, InternalServerErrorException, Delete, Req, Query } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -92,5 +92,66 @@ export class StorageController {
             if (error instanceof HttpException) throw error;
             throw new InternalServerErrorException('An unexpected error occurred during media upload');
         }
+    }
+
+    @Delete('gym/:id/logo')
+    async deleteGymLogo(
+        @Param('id') gymId: string,
+        @Req() req: any // To get userId for ownership check
+    ) {
+        this.logger.log(`Request to delete logo for Gym ID: ${gymId}`);
+
+
+        // 1. Tell Microservice to remove the logo reference from DB
+        // We expect the microservice to return the URL that was deleted
+        const response = await firstValueFrom(
+            this.gymClient.send('delete_gym_logo', {
+                gymId: Number(gymId),
+                userId: req.user.userId
+            })
+        );
+
+        // 2. If DB update successful, delete the actual file from R2
+        if (response.success && response.deletedUrl) {
+            await this.storageService.deleteFile(response.deletedUrl);
+        }
+
+        return response;
+    }
+
+    /**
+     * DELETE GALLERY IMAGE
+     * Endpoint: DELETE /storage/gym/:id/gallery
+     * Usage: Send the URL to delete in the Query String or Body
+     * Example: DELETE /storage/gym/1/gallery?url=https://r2.../img.webp
+     */
+    @Delete('gym/:id/gallery')
+    async deleteGymImage(
+        @Param('id') gymId: string,
+        @Query('url') imageUrl: string, // Get URL from query param
+        @Req() req: any
+    ) {
+        if (!imageUrl) {
+            throw new BadRequestException('Image URL is required');
+        }
+
+        this.logger.log(`Request to delete gallery image for Gym ID: ${gymId}`);
+
+
+        // 1. Tell Microservice to remove this specific URL from the array
+        const response = await firstValueFrom(
+            this.gymClient.send('delete_gym_gallery_image', {
+                gymId: Number(gymId),
+                imageUrl,
+                userId: req.user.userId
+            })
+        );
+
+        // 2. If DB update successful, delete from R2
+        if (response.success) {
+            await this.storageService.deleteFile(imageUrl);
+        }
+
+        return response;
     }
 }
